@@ -16,110 +16,58 @@ import { updateUserAttributes } from "aws-amplify/auth";
 
 export const LandingPage = ({ user }) => {
   const [openModal, setOpenModal] = useState(false);
-  const [results, setResults] = useState();
-  const [profile, setProfile] = useState(false); //profile check
+  const [profile, setProfile] = useState(false); // Profile check
   const [email, setEmail] = useState();
-  const handleModalOpen = () => setOpenModal(true);
-  const handleModalClose = () => setOpenModal(false);
-  const navigate = useNavigate();
-
-  const client = generateClient();
-
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
-    dob: "",
+    date_birth: "",
     height: "",
     weight: "",
     gender: "",
     health_goal: "",
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // const handleProfile = async () => {
-    //   try {
-    //     const result = await client.graphql({ query: listUsers });
-    //     console.log("List User");
-    //     console.log(result.data.listUsers[0]);
-    //     setResults(result.data.listUsers[0]);
-    //     setProfile(result.data.listUsers.items[0].profile);
-    //   } catch (error) {
-    //     console.error("Error adding todo", error);
-    //   }
-    // };
-    console.log("Email", email);
-    if (email === undefined) {
-      console.log("No signed in");
-      console.log(email);
-      navigate("/"); // Redirect to Home page if profile is true
-    } else {
-      // Open the modal if profile is false
-      // navigate("/home");
-    }
-
     async function handleFetchUserAttributes() {
       try {
         const userAttributes = await fetchUserAttributes();
-        console.log("Fetch User Atrributes");
-        console.log(userAttributes.first_name);
-        setEmail(userAttributes.first_name);
+        setEmail(userAttributes.email);
+        // Check if the profile is complete
+        if (userAttributes.profile_complete) {
+          navigate("/home"); // Redirect to Home page if profile is complete
+        } else {
+          setOpenModal(true); // Open the modal if profile is incomplete
+        }
       } catch (error) {
         console.log(error);
       }
     }
     handleFetchUserAttributes();
-  }, [profile, navigate]);
-  const handleClose = () => setOpenModal(false);
-  // Add your form submit handler here
+  }, [navigate]);
 
   const handleUserSubmit = async (event) => {
     event.preventDefault();
     try {
       const attributes = await updateUserAttributes({
         userAttributes: {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          date_of_birth: formData.date_of_birth,
-          health_goal: formData.health_goal,
-          height: formData.height,
-          weight: formData.weight,
-          gender: formData.gender,
+          "custom:Name": formData.first_name,
+          "custom:LastName": formData.last_name,
+          "custom:DOB": formData.date_birth,
+          "custom:Goals": formData.health_goal,
+          "custom:height": formData.height,
+          "custom:weight": formData.weight,
+          "custom:gender": formData.gender,
         },
       });
-      // handle next steps
+      setOpenModal(false);
+      navigate("/home");
     } catch (error) {
       console.log(error);
     }
   };
 
-  // const handleUserSubmit = async (event) => {
-  //   event.preventDefault();
-  //   // Submit form logic here
-  //   try {
-  //     const newUser = await client.graphql({
-  //       query: createUser,
-  //       variables: {
-  //         input: {
-  //           first_name: formData.first_name,
-  //           last_name: formData.last_name,
-  //           date_birth: formData.date_birth,
-  //           height: formData.height,
-  //           weigth: formData.weight,
-  //           gender: formData.gender,
-  //           health_goal: formData.health_goal,
-  //           profile: true,
-  //           profile_user: user,
-  //         },
-  //       },
-  //     });
-  //     console.log(newUser); // Process the result as needed
-  //     navigate("/home");
-  //   } catch (error) {
-  //     console.error("Error adding todo", error);
-  //   }
-  // };
-
-  // Add your form change handler here
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({
@@ -127,28 +75,54 @@ export const LandingPage = ({ user }) => {
       [name]: value,
     });
   };
+
   return (
     <>
-      <Stack
+      <Container
+        maxWidth="md"
         sx={{
+          mt: 18,
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          height: "100vh",
-          paddingTop: 5,
         }}
       >
         <img
-          width="50%"
+          width="30%" // Adjusted logo size
           src={LogoImage}
-          alt="two people working out"
-          style={{ borderRadius: "90px" }}
+          alt="Logo"
+          style={{ borderRadius: "50px" }} // Adjusted border radius
         />
-        <Button onClick={() => setOpenModal(true)}>Complete Profile</Button>
-      </Stack>
+        <Box
+          sx={{
+            m: 5,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h2">Almost There!</Typography>
+          <Typography varient="h6">
+            Welcome to our community! As a valued veteran, we invite you to
+            complete your profile to unlock the full potential of our platform.
+            By providing your details, you'll gain access to personalized
+            services, connect with fellow veterans, and receive tailored support
+            for your unique needs. Let's get started on this journey together!
+          </Typography>
+          <Button
+            sx={{ alignItems: "center" }}
+            variant="contained"
+            onClick={() => setOpenModal(true)}
+          >
+            Complete Profile
+          </Button>
+        </Box>
+      </Container>
       <Modal
         open={openModal}
-        onClose={handleClose}
+        onClose={() => setOpenModal(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -166,8 +140,8 @@ export const LandingPage = ({ user }) => {
           }}
         >
           <Container maxWidth="sm">
-            <Typography variant="h4" gutterBottom>
-              Profile
+            <Typography variant="h5" gutterBottom>
+              Complete Profile
             </Typography>
             <Box
               component="form"
@@ -267,12 +241,7 @@ export const LandingPage = ({ user }) => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    onClick={handleClose}
-                  >
+                  <Button type="submit" fullWidth variant="contained">
                     Save Profile
                   </Button>
                 </Grid>
