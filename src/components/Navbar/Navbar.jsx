@@ -18,11 +18,14 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import Stack from "@mui/material/Stack";
 import { NavLink as RouterLink, useNavigate } from "react-router-dom";
 import { signOut } from "aws-amplify/auth";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 const drawerWidth = 240;
 
@@ -35,6 +38,99 @@ async function handleSignOut() {
 }
 
 export default function ClippedDrawer({ signOut }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const drawerContent = (
+    <Box sx={{ overflow: "auto", display: "flex", flexDirection: "column" }}>
+      <List>
+        <RouterLink
+          style={{ textDecoration: "none", color: "inherit" }}
+          to="/home"
+        >
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <HomeIcon />
+              </ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItemButton>
+          </ListItem>
+        </RouterLink>
+        <RouterLink
+          style={{ textDecoration: "none", color: "inherit" }}
+          to="/workouts"
+        >
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <FitnessCenterIcon />
+              </ListItemIcon>
+              <ListItemText primary="Workouts" />
+            </ListItemButton>
+          </ListItem>
+        </RouterLink>
+        <RouterLink
+          style={{ textDecoration: "none", color: "inherit" }}
+          to="/mental_health"
+        >
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <PsychologyIcon />
+              </ListItemIcon>
+              <ListItemText primary="Mental Health" />
+            </ListItemButton>
+          </ListItem>
+        </RouterLink>
+        <RouterLink
+          style={{ textDecoration: "none", color: "inherit" }}
+          to="/feedback"
+        >
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <FeedbackIcon />
+              </ListItemIcon>
+              <ListItemText primary="Feedback" />
+            </ListItemButton>
+          </ListItem>
+        </RouterLink>
+        <RouterLink
+          style={{ textDecoration: "none", color: "inherit" }}
+          to="/veteran_profile"
+        >
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <AccountBoxIcon />
+              </ListItemIcon>
+              <ListItemText primary="Profile" />
+            </ListItemButton>
+          </ListItem>
+        </RouterLink>
+      </List>
+      <Divider />
+      <Box sx={{ marginTop: "auto", pt: "30px", pl: "30%" }}>
+        <ButtonGroup orientation="vertical" variant="contained">
+          <RouterLink
+            style={{ textDecoration: "none", color: "inherit" }}
+            to="/"
+          >
+            <Button color="secondary" fullWidth onClick={handleSignOut}>
+              Logout
+            </Button>
+          </RouterLink>
+        </ButtonGroup>
+      </Box>
+    </Box>
+  );
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -43,9 +139,20 @@ export default function ClippedDrawer({ signOut }) {
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar>
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <RouterLink
             style={{ textDecoration: "none", color: "inherit" }}
-            to="/"
+            to="/home"
           >
             <Stack direction="row">
               <HealthAndSafetyIcon />
@@ -56,119 +163,30 @@ export default function ClippedDrawer({ signOut }) {
           </RouterLink>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
+      <Box component="nav" sx={{ mt: 7 }}>
+        <Drawer
+          variant={isMobile ? "temporary" : "permanent"}
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
             width: drawerWidth,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
-          <List>
-            <RouterLink
-              style={{ textDecoration: "none", color: "inherit" }}
-              to="/home"
-            >
-              <ListItem disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    <HomeIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Home" />
-                </ListItemButton>
-              </ListItem>
-            </RouterLink>
-            <RouterLink
-              style={{ textDecoration: "none", color: "inherit" }}
-              to="/workouts"
-            >
-              <ListItem disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    <FitnessCenterIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Workouts" />
-                </ListItemButton>
-              </ListItem>
-            </RouterLink>
-            <RouterLink
-              style={{ textDecoration: "none", color: "inherit" }}
-              to="/mental_health"
-            >
-              <ListItem disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    <PsychologyIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Mental Health" />
-                </ListItemButton>
-              </ListItem>
-            </RouterLink>
-            <RouterLink
-              style={{ textDecoration: "none", color: "inherit" }}
-              to="/feedback"
-            >
-              <ListItem disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    <FeedbackIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Feedback" />
-                </ListItemButton>
-              </ListItem>
-            </RouterLink>
-            <RouterLink
-              style={{ textDecoration: "none", color: "inherit" }}
-              to="/veteran_profile"
-            >
-              <ListItem disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    <AccountBoxIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Profile" />
-                </ListItemButton>
-              </ListItem>
-            </RouterLink>
-          </List>
-          <Divider />
-          <Box pt="30px" pl="30%">
-            <ButtonGroup orientation="vertical" variant="contained">
-              <RouterLink
-                style={{ textDecoration: "none", color: "inherit" }}
-                to="/auth"
-              >
-                <Button fullWidth="100%">Login</Button>
-              </RouterLink>
-              <RouterLink
-                style={{ textDecoration: "none", color: "inherit" }}
-                to="/"
-              >
-                <Button
-                  color="secondary"
-                  fullWidth="100%"
-                  onClick={handleSignOut}
-                >
-                  Logout
-                </Button>
-              </RouterLink>
-              <RouterLink
-                style={{ textDecoration: "none", color: "inherit" }}
-                to="/auth"
-              >
-                <Button fullWidth="100%">Register</Button>
-              </RouterLink>
-            </ButtonGroup>
-          </Box>
-        </Box>
-      </Drawer>
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: "border-box",
+            },
+          }}
+        >
+          <Toolbar />
+          {drawerContent}
+        </Drawer>
+      </Box>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
+        {/* Main content */}
       </Box>
     </Box>
   );

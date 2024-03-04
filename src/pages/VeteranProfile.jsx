@@ -51,9 +51,9 @@ export const VeteranProfile = () => {
             first_name: userAttributes["custom:Name"] || "",
             last_name: userAttributes["custom:LastName"] || "",
             date_birth: userAttributes["custom:DOB"] || "", // Updated to match your attribute name
-            height: userAttributes.height || "",
-            weight: userAttributes.weight || "",
-            gender: userAttributes.gender || "",
+            height: userAttributes["custom:height"] || "",
+            weight: userAttributes["custom:weight"] || "",
+            gender: userAttributes["custom:gender"] || "",
             health_goal: userAttributes["custom:Goals"] || "", // Updated to match your attribute name
           });
         }
