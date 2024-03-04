@@ -6,6 +6,8 @@ import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { fetchUserAttributes } from "aws-amplify/auth";
+import { format } from "date-fns";
 import {
   LinearProgress,
   Typography,
@@ -31,31 +33,20 @@ import {
   ButtonBase,
   Collapse,
   IconButton,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
-import Fab from "@mui/material/Fab";
 import VeteranPic from "../assets/Dashboard/veteran.webp";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import NavigationIcon from "@mui/icons-material/Navigation";
-import { Amplify } from "aws-amplify";
-import { generateClient } from "aws-amplify/api";
-import awsExports from "../aws-exports";
-import config from "../amplifyconfiguration.json";
 import { useNavigate } from "react-router-dom";
+import { listWorkouts } from "../graphql/queries";
+import { generateClient } from "aws-amplify/api";
 import {
   createWorkout,
   updateWorkout,
   deleteWorkout,
 } from "../graphql/mutations";
-import { listWorkouts, getWorkout } from "../graphql/queries";
-import { Flex } from "@aws-amplify/ui-react";
-import { getCurrentUser } from "aws-amplify/auth";
-
-Amplify.configure(awsExports);
-Amplify.configure(config);
 const client = generateClient();
-//
+
 function LinearProgressWithLabel(props) {
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -73,63 +64,62 @@ function LinearProgressWithLabel(props) {
 
 export const Home = () => {
   const [progress, setProgress] = React.useState(10);
-  const [fetchedUser, setFetchedUser] = useState("");
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    date_birth: "",
+    height: "",
+    weight: "",
+    gender: "",
+    health_goal: "",
+  });
   const [getWorkouts, setGetWorkout] = useState([]);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [workoutName, setWorkoutName] = useState("");
   const [workoutReps, setWorkoutReps] = useState("");
   const [workoutTime, setWorkoutTime] = useState("");
   const [feeling, setFeeling] = useState("Amazing");
-  const handleModalOpen = () => setModalOpen(true);
-  const handleModalClose = () => setModalOpen(false);
   const [open, setOpen] = useState(false);
-
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  //Get data from DB
+  // Fetch user attributes and workouts
   useEffect(() => {
-    // //UserData
-    // const fetchData = async () => {
-    //   try {
-    //     // Get the current authenticated user
-    //     const user = await getCurrentUser();
-    //     console.log(user.userId);
-    //     // Retrieve the user's ID from the user object
-    //     const userId = user && user.userId;
+    const handleFetchUserAttributes = async () => {
+      try {
+        const userAttributes = await fetchUserAttributes();
+        setFormData({
+          first_name: userAttributes["custom:Name"] || "",
+          last_name: userAttributes["custom:LastName"] || "",
+          date_birth: userAttributes["custom:DOB"] || "",
+          height: userAttributes["custom:height"] || "",
+          weight: userAttributes["custom:weight"] || "",
+          gender: userAttributes["custom:gender"] || "",
+          health_goal: userAttributes["custom:Goals"] || "",
+        });
+      } catch (error) {
+        console.error("Error fetching user attributes:", error);
+      }
+    };
 
-    //     // Construct the GraphQL operation as an object
-    //     const graphqlOperationObject = {
-    //       query: getUser, // Assuming getUser is your GraphQL query
-    //       variables: { id: userId },
-    //     };
-
-    //     // Fetch user data using GraphQL query
-    //     const userDataResponse = await client.graphql(
-    //       getUser,
-    //       graphqlOperationObject
-    //     );
-    //     console.log("user");
-    //     console.log(userDataResponse);
-    //     setFetchedUser(userDataResponse.data.getUser);
-    //   } catch (error) {
-    //     console.error("Error fetching user data:", error);
-    //   }
-    // };
-
-    // Workout Data
     const handleWorkoutDisplay = async () => {
       try {
         const result = await client.graphql({ query: listWorkouts });
-        console.log("List Workout");
-        console.log(result.data.listWorkouts.items);
         setGetWorkout(result.data.listWorkouts.items);
       } catch (error) {
-        console.error("Error adding todo", error);
+        console.error("Error fetching workouts:", error);
       }
     };
-    handleWorkoutDisplay();
-  }, [client, workoutName]);
 
+    handleFetchUserAttributes();
+    handleWorkoutDisplay();
+  }, []);
+
+  const handleModalOpen = () => setModalOpen(true);
+  const handleModalClose = () => setModalOpen(false);
+
+  // Add your workout submit logic here
   //Submit data to the DB
   const handleWorkoutSubmit = async () => {
     console.log("Submitting workout:", { workoutName, feeling });
@@ -163,6 +153,7 @@ export const Home = () => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
+          p: 2,
         }}
       >
         <Typography variant="h5" sx={{ textAlign: "end" }}>
@@ -171,43 +162,44 @@ export const Home = () => {
         <Box
           sx={{
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             alignItems: "center",
+            justifyContent: "space-between",
             background: "linear-gradient(to left, #fff, #E1FAF6,#91C7DB)",
-            bgcolor: "background.paper",
-            width: 800,
-            height: 180,
+            width: "100%",
+            maxWidth: 800,
+            height: "auto",
             boxShadow: 1,
             borderRadius: 2,
             mb: 3,
             mt: 2,
+            p: 2,
           }}
         >
-          <Box sx={{ flexGrow: 1 }} pl="5%">
+          <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h6" sx={{ m: 1 }}>
-              Hello, {fetchedUser.first_name}
+              Hello, {formData.first_name}
             </Typography>
-            {/* <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <LinearProgressWithLabel value={progress} sx={{ width: "50%" }} />
-            </Box> */}
-
             <Typography variant="body1" sx={{ m: 1 }}>
               Have a nice day and don't forget to take care of your health!
             </Typography>
             <Button
               variant="contained"
               onClick={() => navigate("/veteran_profile")}
+              sx={{ mt: isMobile ? 2 : 0 }}
             >
               Update Your Profile!
             </Button>
           </Box>
           <Box
             sx={{
-              width: 180,
-              height: 180,
+              width: isMobile ? "100%" : 180,
+              height: isMobile ? "auto" : 180,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               borderRadius: 3,
+              mt: isMobile ? 2 : 0,
             }}
           >
             <img
@@ -224,9 +216,11 @@ export const Home = () => {
         <Box
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: isMobile ? "column" : "row",
             alignItems: "center",
             gap: 3,
+            width: "100%",
+            justifyContent: "center",
           }}
         >
           <ButtonBase
@@ -237,12 +231,11 @@ export const Home = () => {
               alignItems: "center",
               justifyContent: "center",
               background: "linear-gradient(to left, #E1FAF6, #91C7DB)",
-              width: 250,
+              width: isMobile ? "80%" : 250,
               height: 120,
               boxShadow: 1,
               borderRadius: 2,
               mb: 3,
-              mt: 2,
             }}
           >
             <AddCircleOutlinedIcon />
@@ -256,12 +249,11 @@ export const Home = () => {
               alignItems: "center",
               justifyContent: "center",
               background: "linear-gradient(to right, #E1FAF6, #91C7DB)",
-              width: 250,
+              width: isMobile ? "80%" : 250,
               height: 120,
               boxShadow: 1,
               borderRadius: 2,
               mb: 3,
-              mt: 2,
             }}
           >
             <UpcomingOutlinedIcon />
@@ -274,12 +266,11 @@ export const Home = () => {
               alignItems: "center",
               justifyContent: "center",
               background: "linear-gradient(to top, #E1FAF6, #91C7DB)",
-              width: 250,
+              width: isMobile ? "80%" : 250,
               height: 120,
               boxShadow: 1,
               borderRadius: 2,
               mb: 3,
-              mt: 2,
             }}
           >
             <PhoneOutlinedIcon />
@@ -323,40 +314,16 @@ export const Home = () => {
                 {getWorkouts.map((getWorkout, index) => (
                   <React.Fragment key={index}>
                     <TableRow>
-                      <TableCell>
-                        <IconButton
-                          aria-label="expand row"
-                          size="small"
-                          onClick={() => setOpen(!open)}
-                        >
-                          {open ? (
-                            <KeyboardArrowUpIcon />
-                          ) : (
-                            <KeyboardArrowDownIcon />
-                          )}
-                        </IconButton>
-                      </TableCell>
+                      <TableCell></TableCell>
                       <TableCell component="th" scope="row">
                         {getWorkout.workout_name}
                       </TableCell>
                       <TableCell align="right">{getWorkout.feel}</TableCell>
                       <TableCell align="right">
-                        {getWorkout.createdAt}
+                        {format(new Date(getWorkout.createdAt), "dd MMM yyyy")}
                       </TableCell>
                     </TableRow>
-                    <TableRow>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={6}
-                      >
-                        <Collapse in={open} timeout="auto" unmountOnExit>
-                          <div style={{ margin: 20 }}>
-                            {/* Add your collapsible content here */}
-                            <p>Details about the workout...</p>
-                          </div>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
+                    <TableRow></TableRow>
                   </React.Fragment>
                 ))}
               </TableBody>
@@ -364,15 +331,6 @@ export const Home = () => {
           </TableContainer>
         </Box>
 
-        {/* <Grid item xs={5}>
-            <Box sx={{ position: "relative", m: 8 }}>
-              <Typography variant="h5" sx={{ textAlign: "center", pb: 7 }}>
-                Exercise of the Day
-              </Typography>
-            </Box>
-          </Grid> */}
-
-        <Grid item xs={8}></Grid>
         <Modal
           open={modalOpen}
           onClose={handleModalClose}

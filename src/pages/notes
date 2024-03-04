@@ -20,3 +20,70 @@ const handleWorkoutSubmit = async () => {
 };
 
 //Get Data from the DB.
+<Box
+  sx={{
+    position: "relative",
+    m: 8,
+    background: "linear-gradient(to right, #fff, #E1FAF6,#91C7DB)",
+    bgcolor: "background.paper",
+    boxShadow: 3,
+    borderRadius: 2,
+  }}
+>
+  <Typography variant="h5" sx={{ textAlign: "center", pb: 7 }}>
+    Your Last Workouts
+  </Typography>
+
+  <TableContainer
+    sx={{
+      width: 800,
+      background: "linear-gradient(to bottom, #E1FAF6, #91C7DB)",
+    }}
+  >
+    <Table aria-label="collapsible table">
+      <TableHead>
+        <TableRow>
+          <TableCell />
+          <TableCell>Workout Name</TableCell>
+          <TableCell align="right">Feeling</TableCell>
+          <TableCell align="right">Date</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {getWorkouts.map((getWorkout, index) => (
+          <React.Fragment key={index}>
+            <TableRow>
+              <TableCell>
+                <IconButton
+                  aria-label="expand row"
+                  size="small"
+                  onClick={() => setOpen(!open)}
+                >
+                  {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                </IconButton>
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {getWorkout.workout_name}
+              </TableCell>
+              <TableCell align="right">{getWorkout.feel}</TableCell>
+              <TableCell align="right">{getWorkout.createdAt}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell
+                style={{ paddingBottom: 0, paddingTop: 0 }}
+                colSpan={6}
+              >
+                <Collapse in={open} timeout="auto" unmountOnExit>
+                  <div style={{ margin: 20 }}>
+                    {/* Add your collapsible content here */}
+                    <p>Details about the workout...</p>
+                  </div>
+                </Collapse>
+              </TableCell>
+            </TableRow>
+          </React.Fragment>
+        ))}
+      </TableBody>
+    </Table>
+  </TableContainer>
+</Box>;
