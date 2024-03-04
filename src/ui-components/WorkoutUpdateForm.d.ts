@@ -24,16 +24,22 @@ export declare type ValidationFunction<T> = (value: T, validationResponse: Valid
 export declare type WorkoutUpdateFormInputValues = {
     workout_name?: string;
     feel?: string;
+    repetition?: number;
+    workout_time?: string;
 };
 export declare type WorkoutUpdateFormValidationValues = {
     workout_name?: ValidationFunction<string>;
     feel?: ValidationFunction<string>;
+    repetition?: ValidationFunction<number>;
+    workout_time?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type WorkoutUpdateFormOverridesProps = {
     WorkoutUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
     workout_name?: PrimitiveOverrideProps<TextFieldProps>;
     feel?: PrimitiveOverrideProps<TextFieldProps>;
+    repetition?: PrimitiveOverrideProps<TextFieldProps>;
+    workout_time?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type WorkoutUpdateFormProps = React.PropsWithChildren<{
     overrides?: WorkoutUpdateFormOverridesProps | undefined | null;

@@ -9,11 +9,13 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
-import { createWorkout } from "../graphql/mutations";
+import { getTodo } from "../graphql/queries";
+import { updateTodo } from "../graphql/mutations";
 const client = generateClient();
-export default function WorkoutCreateForm(props) {
+export default function TodoUpdateForm(props) {
   const {
-    clearOnSuccess = true,
+    id: idProp,
+    todo: todoModelProp,
     onSuccess,
     onError,
     onSubmit,
@@ -23,32 +25,41 @@ export default function WorkoutCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    workout_name: "",
-    feel: "",
-    repetition: "",
-    workout_time: "",
+    name: "",
+    description: "",
   };
-  const [workout_name, setWorkout_name] = React.useState(
-    initialValues.workout_name
-  );
-  const [feel, setFeel] = React.useState(initialValues.feel);
-  const [repetition, setRepetition] = React.useState(initialValues.repetition);
-  const [workout_time, setWorkout_time] = React.useState(
-    initialValues.workout_time
+  const [name, setName] = React.useState(initialValues.name);
+  const [description, setDescription] = React.useState(
+    initialValues.description
   );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setWorkout_name(initialValues.workout_name);
-    setFeel(initialValues.feel);
-    setRepetition(initialValues.repetition);
-    setWorkout_time(initialValues.workout_time);
+    const cleanValues = todoRecord
+      ? { ...initialValues, ...todoRecord }
+      : initialValues;
+    setName(cleanValues.name);
+    setDescription(cleanValues.description);
     setErrors({});
   };
+  const [todoRecord, setTodoRecord] = React.useState(todoModelProp);
+  React.useEffect(() => {
+    const queryData = async () => {
+      const record = idProp
+        ? (
+            await client.graphql({
+              query: getTodo.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getTodo
+        : todoModelProp;
+      setTodoRecord(record);
+    };
+    queryData();
+  }, [idProp, todoModelProp]);
+  React.useEffect(resetStateValues, [todoRecord]);
   const validations = {
-    workout_name: [{ type: "Required" }],
-    feel: [],
-    repetition: [],
-    workout_time: [],
+    name: [{ type: "Required" }],
+    description: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -76,10 +87,8 @@ export default function WorkoutCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          workout_name,
-          feel,
-          repetition,
-          workout_time,
+          name,
+          description: description ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -110,18 +119,16 @@ export default function WorkoutCreateForm(props) {
             }
           });
           await client.graphql({
-            query: createWorkout.replaceAll("__typename", ""),
+            query: updateTodo.replaceAll("__typename", ""),
             variables: {
               input: {
+                id: todoRecord.id,
                 ...modelFields,
               },
             },
           });
           if (onSuccess) {
             onSuccess(modelFields);
-          }
-          if (clearOnSuccess) {
-            resetStateValues();
           }
         } catch (err) {
           if (onError) {
@@ -130,134 +137,72 @@ export default function WorkoutCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "WorkoutCreateForm")}
+      {...getOverrideProps(overrides, "TodoUpdateForm")}
       {...rest}
     >
       <TextField
-        label="Workout name"
+        label="Name"
         isRequired={true}
         isReadOnly={false}
-        value={workout_name}
+        value={name}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              workout_name: value,
-              feel,
-              repetition,
-              workout_time,
+              name: value,
+              description,
             };
             const result = onChange(modelFields);
-            value = result?.workout_name ?? value;
+            value = result?.name ?? value;
           }
-          if (errors.workout_name?.hasError) {
-            runValidationTasks("workout_name", value);
+          if (errors.name?.hasError) {
+            runValidationTasks("name", value);
           }
-          setWorkout_name(value);
+          setName(value);
         }}
-        onBlur={() => runValidationTasks("workout_name", workout_name)}
-        errorMessage={errors.workout_name?.errorMessage}
-        hasError={errors.workout_name?.hasError}
-        {...getOverrideProps(overrides, "workout_name")}
+        onBlur={() => runValidationTasks("name", name)}
+        errorMessage={errors.name?.errorMessage}
+        hasError={errors.name?.hasError}
+        {...getOverrideProps(overrides, "name")}
       ></TextField>
       <TextField
-        label="Feel"
+        label="Description"
         isRequired={false}
         isReadOnly={false}
-        value={feel}
+        value={description}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              workout_name,
-              feel: value,
-              repetition,
-              workout_time,
+              name,
+              description: value,
             };
             const result = onChange(modelFields);
-            value = result?.feel ?? value;
+            value = result?.description ?? value;
           }
-          if (errors.feel?.hasError) {
-            runValidationTasks("feel", value);
+          if (errors.description?.hasError) {
+            runValidationTasks("description", value);
           }
-          setFeel(value);
+          setDescription(value);
         }}
-        onBlur={() => runValidationTasks("feel", feel)}
-        errorMessage={errors.feel?.errorMessage}
-        hasError={errors.feel?.hasError}
-        {...getOverrideProps(overrides, "feel")}
-      ></TextField>
-      <TextField
-        label="Repetition"
-        isRequired={false}
-        isReadOnly={false}
-        type="number"
-        step="any"
-        value={repetition}
-        onChange={(e) => {
-          let value = isNaN(parseInt(e.target.value))
-            ? e.target.value
-            : parseInt(e.target.value);
-          if (onChange) {
-            const modelFields = {
-              workout_name,
-              feel,
-              repetition: value,
-              workout_time,
-            };
-            const result = onChange(modelFields);
-            value = result?.repetition ?? value;
-          }
-          if (errors.repetition?.hasError) {
-            runValidationTasks("repetition", value);
-          }
-          setRepetition(value);
-        }}
-        onBlur={() => runValidationTasks("repetition", repetition)}
-        errorMessage={errors.repetition?.errorMessage}
-        hasError={errors.repetition?.hasError}
-        {...getOverrideProps(overrides, "repetition")}
-      ></TextField>
-      <TextField
-        label="Workout time"
-        isRequired={false}
-        isReadOnly={false}
-        type="time"
-        value={workout_time}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              workout_name,
-              feel,
-              repetition,
-              workout_time: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.workout_time ?? value;
-          }
-          if (errors.workout_time?.hasError) {
-            runValidationTasks("workout_time", value);
-          }
-          setWorkout_time(value);
-        }}
-        onBlur={() => runValidationTasks("workout_time", workout_time)}
-        errorMessage={errors.workout_time?.errorMessage}
-        hasError={errors.workout_time?.hasError}
-        {...getOverrideProps(overrides, "workout_time")}
+        onBlur={() => runValidationTasks("description", description)}
+        errorMessage={errors.description?.errorMessage}
+        hasError={errors.description?.hasError}
+        {...getOverrideProps(overrides, "description")}
       ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
       >
         <Button
-          children="Clear"
+          children="Reset"
           type="reset"
           onClick={(event) => {
             event.preventDefault();
             resetStateValues();
           }}
-          {...getOverrideProps(overrides, "ClearButton")}
+          isDisabled={!(idProp || todoModelProp)}
+          {...getOverrideProps(overrides, "ResetButton")}
         ></Button>
         <Flex
           gap="15px"
@@ -267,7 +212,10 @@ export default function WorkoutCreateForm(props) {
             children="Submit"
             type="submit"
             variation="primary"
-            isDisabled={Object.values(errors).some((e) => e?.hasError)}
+            isDisabled={
+              !(idProp || todoModelProp) ||
+              Object.values(errors).some((e) => e?.hasError)
+            }
             {...getOverrideProps(overrides, "SubmitButton")}
           ></Button>
         </Flex>

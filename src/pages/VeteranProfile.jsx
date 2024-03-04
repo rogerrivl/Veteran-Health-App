@@ -7,7 +7,7 @@ import {
   Container,
   Grid,
 } from "@mui/material";
-import { createUser, updateUser, deleteWorkout } from "../graphql/mutations";
+// import { createUser, updateUser, deleteWorkout } from "../graphql/mutations 2";
 import { listWorkouts, listUsers } from "../graphql/queries";
 import { generateClient } from "aws-amplify/api";
 import { fetchUserAttributes } from "aws-amplify/auth";
@@ -65,31 +65,31 @@ export const VeteranProfile = () => {
     handleFetchUserAttributes();
   }, []);
   //   Submit data to the DB
-  const handleUserSubmit = async (event) => {
-    console.log("Press Submit");
-    event.preventDefault();
-    console.log(formData);
-    try {
-      const newUser = await client.graphql({
-        query: updateUser,
-        variables: {
-          input: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            date_birth: formData.date_birth,
-            height: formData.height,
-            weigth: formData.weight,
-            gender: formData.gender,
-            health_goal: formData.health_goal,
-            profile: true,
-          },
-        },
-      });
-      console.log(newUser); // Process the result as needed
-    } catch (error) {
-      console.error("Error adding todo", error);
-    }
-  };
+  // const handleUserSubmit = async (event) => {
+  //   console.log("Press Submit");
+  //   event.preventDefault();
+  //   console.log(formData);
+  //   try {
+  //     const newUser = await client.graphql({
+  //       query: updateUser,
+  //       variables: {
+  //         input: {
+  //           first_name: formData.first_name,
+  //           last_name: formData.last_name,
+  //           date_birth: formData.date_birth,
+  //           height: formData.height,
+  //           weigth: formData.weight,
+  //           gender: formData.gender,
+  //           health_goal: formData.health_goal,
+  //           profile: true,
+  //         },
+  //       },
+  //     });
+  //     console.log(newUser); // Process the result as needed
+  //   } catch (error) {
+  //     console.error("Error adding todo", error);
+  //   }
+  // };
 
   return (
     <Container maxWidth="sm">
@@ -97,12 +97,7 @@ export const VeteranProfile = () => {
         Profile
       </Typography>
 
-      <Box
-        component="form"
-        noValidate
-        autoComplete="off"
-        onSubmit={handleUserSubmit}
-      >
+      <Box component="form" noValidate autoComplete="off" onSubmit={null}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField

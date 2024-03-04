@@ -1,0 +1,7 @@
+type Workout @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  workout_name: String!
+  feel: String
+  repetition: Int
+  workout_time: AWSTime
+}

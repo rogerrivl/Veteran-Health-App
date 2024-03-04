@@ -27,11 +27,17 @@ export default function WorkoutUpdateForm(props) {
   const initialValues = {
     workout_name: "",
     feel: "",
+    repetition: "",
+    workout_time: "",
   };
   const [workout_name, setWorkout_name] = React.useState(
     initialValues.workout_name
   );
   const [feel, setFeel] = React.useState(initialValues.feel);
+  const [repetition, setRepetition] = React.useState(initialValues.repetition);
+  const [workout_time, setWorkout_time] = React.useState(
+    initialValues.workout_time
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = workoutRecord
@@ -39,6 +45,8 @@ export default function WorkoutUpdateForm(props) {
       : initialValues;
     setWorkout_name(cleanValues.workout_name);
     setFeel(cleanValues.feel);
+    setRepetition(cleanValues.repetition);
+    setWorkout_time(cleanValues.workout_time);
     setErrors({});
   };
   const [workoutRecord, setWorkoutRecord] = React.useState(workoutModelProp);
@@ -59,7 +67,9 @@ export default function WorkoutUpdateForm(props) {
   React.useEffect(resetStateValues, [workoutRecord]);
   const validations = {
     workout_name: [{ type: "Required" }],
-    feel: [{ type: "Required" }],
+    feel: [],
+    repetition: [],
+    workout_time: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -88,7 +98,9 @@ export default function WorkoutUpdateForm(props) {
         event.preventDefault();
         let modelFields = {
           workout_name,
-          feel,
+          feel: feel ?? null,
+          repetition: repetition ?? null,
+          workout_time: workout_time ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -151,6 +163,8 @@ export default function WorkoutUpdateForm(props) {
             const modelFields = {
               workout_name: value,
               feel,
+              repetition,
+              workout_time,
             };
             const result = onChange(modelFields);
             value = result?.workout_name ?? value;
@@ -167,7 +181,7 @@ export default function WorkoutUpdateForm(props) {
       ></TextField>
       <TextField
         label="Feel"
-        isRequired={true}
+        isRequired={false}
         isReadOnly={false}
         value={feel}
         onChange={(e) => {
@@ -176,6 +190,8 @@ export default function WorkoutUpdateForm(props) {
             const modelFields = {
               workout_name,
               feel: value,
+              repetition,
+              workout_time,
             };
             const result = onChange(modelFields);
             value = result?.feel ?? value;
@@ -189,6 +205,65 @@ export default function WorkoutUpdateForm(props) {
         errorMessage={errors.feel?.errorMessage}
         hasError={errors.feel?.hasError}
         {...getOverrideProps(overrides, "feel")}
+      ></TextField>
+      <TextField
+        label="Repetition"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={repetition}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              workout_name,
+              feel,
+              repetition: value,
+              workout_time,
+            };
+            const result = onChange(modelFields);
+            value = result?.repetition ?? value;
+          }
+          if (errors.repetition?.hasError) {
+            runValidationTasks("repetition", value);
+          }
+          setRepetition(value);
+        }}
+        onBlur={() => runValidationTasks("repetition", repetition)}
+        errorMessage={errors.repetition?.errorMessage}
+        hasError={errors.repetition?.hasError}
+        {...getOverrideProps(overrides, "repetition")}
+      ></TextField>
+      <TextField
+        label="Workout time"
+        isRequired={false}
+        isReadOnly={false}
+        type="time"
+        value={workout_time}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              workout_name,
+              feel,
+              repetition,
+              workout_time: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.workout_time ?? value;
+          }
+          if (errors.workout_time?.hasError) {
+            runValidationTasks("workout_time", value);
+          }
+          setWorkout_time(value);
+        }}
+        onBlur={() => runValidationTasks("workout_time", workout_time)}
+        errorMessage={errors.workout_time?.errorMessage}
+        hasError={errors.workout_time?.hasError}
+        {...getOverrideProps(overrides, "workout_time")}
       ></TextField>
       <Flex
         justifyContent="space-between"

@@ -48,12 +48,7 @@ import {
   updateWorkout,
   deleteWorkout,
 } from "../graphql/mutations";
-import {
-  listWorkouts,
-  listUsers,
-  getWorkout,
-  getUser,
-} from "../graphql/queries";
+import { listWorkouts, getWorkout } from "../graphql/queries";
 import { Flex } from "@aws-amplify/ui-react";
 import { getCurrentUser } from "aws-amplify/auth";
 
@@ -93,35 +88,33 @@ export const Home = () => {
 
   //Get data from DB
   useEffect(() => {
-    //UserData
-    const fetchData = async () => {
-      try {
-        // Get the current authenticated user
-        const user = await getCurrentUser();
-        console.log(user.userId);
-        // Retrieve the user's ID from the user object
-        const userId = user && user.userId;
+    // //UserData
+    // const fetchData = async () => {
+    //   try {
+    //     // Get the current authenticated user
+    //     const user = await getCurrentUser();
+    //     console.log(user.userId);
+    //     // Retrieve the user's ID from the user object
+    //     const userId = user && user.userId;
 
-        // Construct the GraphQL operation as an object
-        const graphqlOperationObject = {
-          query: getUser, // Assuming getUser is your GraphQL query
-          variables: { id: userId },
-        };
+    //     // Construct the GraphQL operation as an object
+    //     const graphqlOperationObject = {
+    //       query: getUser, // Assuming getUser is your GraphQL query
+    //       variables: { id: userId },
+    //     };
 
-        // Fetch user data using GraphQL query
-        const userDataResponse = await client.graphql(
-          getUser,
-          graphqlOperationObject
-        );
-        console.log("user");
-        console.log(userDataResponse);
-        setFetchedUser(userDataResponse.data.getUser);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchData();
+    //     // Fetch user data using GraphQL query
+    //     const userDataResponse = await client.graphql(
+    //       getUser,
+    //       graphqlOperationObject
+    //     );
+    //     console.log("user");
+    //     console.log(userDataResponse);
+    //     setFetchedUser(userDataResponse.data.getUser);
+    //   } catch (error) {
+    //     console.error("Error fetching user data:", error);
+    //   }
+    // };
 
     // Workout Data
     const handleWorkoutDisplay = async () => {
@@ -135,7 +128,6 @@ export const Home = () => {
       }
     };
     handleWorkoutDisplay();
-    fetchData();
   }, [client, workoutName]);
 
   //Submit data to the DB

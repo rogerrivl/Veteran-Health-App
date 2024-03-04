@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import Modal from "@mui/material/Modal";
-import { listUsers } from "../graphql/queries";
+
 import { generateClient } from "aws-amplify/api";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
@@ -36,17 +36,17 @@ export const LandingPage = ({ user }) => {
   });
 
   useEffect(() => {
-    const handleProfile = async () => {
-      try {
-        const result = await client.graphql({ query: listUsers });
-        console.log("List User");
-        console.log(result.data.listUsers[0]);
-        setResults(result.data.listUsers[0]);
-        setProfile(result.data.listUsers.items[0].profile);
-      } catch (error) {
-        console.error("Error adding todo", error);
-      }
-    };
+    // const handleProfile = async () => {
+    //   try {
+    //     const result = await client.graphql({ query: listUsers });
+    //     console.log("List User");
+    //     console.log(result.data.listUsers[0]);
+    //     setResults(result.data.listUsers[0]);
+    //     setProfile(result.data.listUsers.items[0].profile);
+    //   } catch (error) {
+    //     console.error("Error adding todo", error);
+    //   }
+    // };
     console.log("Email", email);
     if (email === undefined) {
       console.log("No signed in");
@@ -68,8 +68,6 @@ export const LandingPage = ({ user }) => {
       }
     }
     handleFetchUserAttributes();
-
-    handleProfile();
   }, [profile, navigate]);
   const handleClose = () => setOpenModal(false);
   // Add your form submit handler here
